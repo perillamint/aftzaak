@@ -3,6 +3,10 @@ name = "aftzaak"
 version = "0.1.0"
 edition = "2024"
 
+[workspace]
+members = ["migration"]
+
 [dependencies]
 tokio = { version = "1.52.3", features = ["full"] }
-sea-orm = { version = "2.0.0-rc", features = [ "sqlx-postgres", "runtime-tokio-rustls", "macros" ] }
+#sea-orm = { version = "2.0.0-rc", features = [ "sqlx-postgres", "runtime-tokio-rustls", "macros" ] }
+sea-orm = { git = "https://github.com/SeaQL/sea-orm.git", rev = "aa3624617991fdb76645fbf0935ab7de491c2ba2", features = [ "sqlx-postgres", "runtime-tokio-rustls", "macros" ] }
