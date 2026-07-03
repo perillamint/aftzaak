@@ -2,7 +2,6 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 
 use axum::Router;
-use axum::routing::get;
 use clap::Parser;
 use sea_orm::Database;
 
@@ -10,6 +9,7 @@ use config::Config;
 
 mod config;
 mod api;
+mod types;
 
 #[derive(Parser)]
 struct Args {
@@ -33,7 +33,9 @@ async fn main() -> Result<(), anyhow::Error> {
 
     let state = Arc::new(AppState { db });
 
-    let app = Router::new().route("/", get(hello)).with_state(state);
+    let app = Router::new()
+        .nest("/api", api::get_router())
+        .with_state(state);
 
     let addr = SocketAddr::from((cfg.http.listen, cfg.http.port));
     let listener = tokio::net::TcpListener::bind(addr).await?;
@@ -44,10 +46,6 @@ async fn main() -> Result<(), anyhow::Error> {
         .await?;
 
     Ok(())
-}
-
-async fn hello() -> String {
-    String::from("Hello, world!")
 }
 
 async fn shutdown_signal() {
