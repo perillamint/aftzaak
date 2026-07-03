@@ -10,7 +10,7 @@ impl MigrationName for Migration {
 }
 
 #[derive(DeriveIden)]
-enum User {
+pub(crate) enum User {
     Table,
     Id,
     Email,
