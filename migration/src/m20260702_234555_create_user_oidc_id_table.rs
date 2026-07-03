@@ -1,6 +1,6 @@
+use super::m20260702_130849_create_user_table::User;
 use sea_orm_migration::prelude::*;
 use sea_query::Expr;
-use super::m20260702_130849_create_user_table::User;
 
 pub struct Migration;
 
@@ -35,11 +35,7 @@ impl MigrationTrait for Migration {
                             .not_null()
                             .primary_key(),
                     )
-                    .col(
-                        ColumnDef::new(UserOidcId::UserId)
-                            .uuid()
-                            .not_null(),
-                    )
+                    .col(ColumnDef::new(UserOidcId::UserId).uuid().not_null())
                     .col(ColumnDef::new(UserOidcId::Issuer).text().not_null())
                     .col(ColumnDef::new(UserOidcId::Subject).text().not_null())
                     .col(

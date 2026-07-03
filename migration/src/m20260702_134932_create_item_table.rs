@@ -31,12 +31,7 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(Item::Table)
                     .if_not_exists()
-                    .col(
-                        ColumnDef::new(Item::Id)
-                            .uuid()
-                            .not_null()
-                            .primary_key(),
-                    )
+                    .col(ColumnDef::new(Item::Id).uuid().not_null().primary_key())
                     .col(ColumnDef::new(Item::Title).text().not_null())
                     .col(ColumnDef::new(Item::MimeType).text())
                     .col(ColumnDef::new(Item::SizeBytes).big_integer())

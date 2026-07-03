@@ -1,5 +1,3 @@
-mod config;
-
 use std::net::SocketAddr;
 use std::sync::Arc;
 
@@ -9,6 +7,9 @@ use clap::Parser;
 use sea_orm::Database;
 
 use config::Config;
+
+mod config;
+mod api;
 
 #[derive(Parser)]
 struct Args {
@@ -34,7 +35,7 @@ async fn main() -> Result<(), anyhow::Error> {
 
     let app = Router::new().route("/", get(hello)).with_state(state);
 
-    let addr = SocketAddr::from((cfg.host.parse::<std::net::IpAddr>()?, cfg.port));
+    let addr = SocketAddr::from((cfg.http.listen, cfg.http.port));
     let listener = tokio::net::TcpListener::bind(addr).await?;
     tracing::info!("listening on {addr}");
 

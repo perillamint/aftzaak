@@ -1,7 +1,7 @@
-use sea_orm_migration::prelude::*;
-use sea_query::Expr;
 use super::m20260702_134555_create_facet_table::Facet;
 use super::m20260702_134932_create_item_table::Item;
+use sea_orm_migration::prelude::*;
+use sea_query::Expr;
 
 pub struct Migration;
 
@@ -40,11 +40,7 @@ impl MigrationTrait for Migration {
                             .not_null()
                             .primary_key(),
                     )
-                    .col(
-                        ColumnDef::new(ItemFacetValue::ItemId)
-                            .uuid()
-                            .not_null(),
-                    )
+                    .col(ColumnDef::new(ItemFacetValue::ItemId).uuid().not_null())
                     .col(ColumnDef::new(ItemFacetValue::FacetId).uuid().not_null())
                     .col(
                         ColumnDef::new(ItemFacetValue::IsMultiValue)
@@ -54,10 +50,7 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(ItemFacetValue::ValueText).text())
                     .col(ColumnDef::new(ItemFacetValue::ValueNumeric).decimal())
                     .col(ColumnDef::new(ItemFacetValue::ValueBoolean).boolean())
-                    .col(
-                        ColumnDef::new(ItemFacetValue::ValueTimestamp)
-                            .timestamp_with_time_zone(),
-                    )
+                    .col(ColumnDef::new(ItemFacetValue::ValueTimestamp).timestamp_with_time_zone())
                     .col(
                         ColumnDef::new(ItemFacetValue::CreatedAt)
                             .timestamp_with_time_zone()

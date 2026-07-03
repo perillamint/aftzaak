@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize)]
 pub struct Http {
-    pub host: String,
+    pub listen: std::net::IpAddr,
     pub port: u16,
 }
 
