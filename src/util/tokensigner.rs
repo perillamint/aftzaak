@@ -56,23 +56,12 @@ impl TokenSigner {
     }
 
     pub fn verify(&self, token: &str) -> Result<Claims, AppError> {
-        let token_data = jsonwebtoken::decode::<Claims>(
-            token,
-            &self.decoding_key,
-            &jsonwebtoken::Validation::new(jsonwebtoken::Algorithm::HS256),
-        )?;
+        let mut validation = jsonwebtoken::Validation::new(jsonwebtoken::Algorithm::HS256);
+        validation.validate_exp = true;
+        validation.leeway = 30; // 30초 clock skew 허용
+        validation.set_issuer(&[&self.issuer]);
 
-        // Check token validity
-        let now = chrono::Utc::now().timestamp();
-        if token_data.claims.iat > now {
-            return Err(AppError::InvalidCredentials);
-        }
-        if token_data.claims.exp < now {
-            return Err(AppError::InvalidCredentials);
-        }
-        if token_data.claims.iss != self.issuer {
-            return Err(AppError::InvalidCredentials);
-        }
+        let token_data = jsonwebtoken::decode::<Claims>(token, &self.decoding_key, &validation)?;
 
         Ok(token_data.claims)
     }

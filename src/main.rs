@@ -12,6 +12,7 @@ pub mod api;
 pub mod config;
 pub mod entity;
 pub mod error;
+pub mod middleware;
 pub mod types;
 pub mod util;
 
@@ -46,7 +47,7 @@ async fn main() -> Result<(), anyhow::Error> {
     });
 
     let app = Router::new()
-        .nest("/api", api::get_router())
+        .nest("/api", api::get_router(state.clone()))
         .with_state(state);
 
     let addr = SocketAddr::from((cfg.http.listen, cfg.http.port));

@@ -35,3 +35,9 @@ pub struct TokenResponse {
     pub token_type: String,
     pub exp: i64,
 }
+
+#[derive(Serialize)]
+pub struct TokenInfo {
+    pub user_id: String,
+    pub perm: String,
+}

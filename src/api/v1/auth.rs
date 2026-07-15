@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use argon2::password_hash::SaltString;
 use argon2::password_hash::rand_core::OsRng;
 use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
@@ -6,7 +8,6 @@ use axum::routing::post;
 use axum::{Json, Router};
 use chrono::Utc;
 use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter};
-use std::sync::Arc;
 use uuid::Uuid;
 
 use crate::AppState;
@@ -58,6 +59,7 @@ async fn login(
 ) -> AppResult<Json<TokenResponse>> {
     let user = user::Entity::find()
         .filter(user::Column::Email.eq(&req.email))
+        .filter(user::Column::State.eq(true))
         .one(&state.db)
         .await?
         .ok_or(AppError::InvalidCredentials)?;
