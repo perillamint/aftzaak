@@ -34,10 +34,10 @@ impl MigrationTrait for Migration {
                     .if_not_exists()
                     .col(ColumnDef::new(Item::Id).uuid().not_null().primary_key())
                     .col(ColumnDef::new(Item::Title).text().not_null())
-                    .col(ColumnDef::new(Item::MimeType).text())
-                    .col(ColumnDef::new(Item::SizeBytes).big_integer())
+                    .col(ColumnDef::new(Item::MimeType).text().not_null())
+                    .col(ColumnDef::new(Item::SizeBytes).big_integer().not_null())
                     .col(ColumnDef::new(Item::Checksum).text())
-                    .col(ColumnDef::new(Item::StorageUri).text())
+                    .col(ColumnDef::new(Item::StorageUri).text().not_null())
                     .col(ColumnDef::new(Item::Metadata).json_binary())
                     .col(
                         ColumnDef::new(Item::CreatedAt)
@@ -54,7 +54,7 @@ impl MigrationTrait for Migration {
                     .col(
                         ColumnDef::new(Item::DeletedAt)
                             .timestamp_with_time_zone()
-                            .null()
+                            .null(),
                     )
                     .to_owned(),
             )
@@ -98,7 +98,7 @@ impl MigrationTrait for Migration {
                     .name("idx__item__deleted_at")
                     .table(Item::Table)
                     .col(Item::UpdatedAt)
-                    .to_owned()
+                    .to_owned(),
             )
             .await?;
 

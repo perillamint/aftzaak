@@ -10,13 +10,13 @@ pub struct Model {
     pub id: Uuid,
     #[sea_orm(column_type = "Text")]
     pub title: String,
-    #[sea_orm(column_type = "Text", nullable)]
-    pub mime_type: Option<String>,
-    pub size_bytes: Option<i64>,
+    #[sea_orm(column_type = "Text")]
+    pub mime_type: String,
+    pub size_bytes: i64,
     #[sea_orm(column_type = "Text", nullable)]
     pub checksum: Option<String>,
-    #[sea_orm(column_type = "Text", nullable)]
-    pub storage_uri: Option<String>,
+    #[sea_orm(column_type = "Text")]
+    pub storage_uri: String,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub metadata: Option<Json>,
     pub created_at: DateTimeWithTimeZone,

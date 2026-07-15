@@ -14,6 +14,12 @@ pub enum AppError {
     #[error("unauthorized")]
     Unauthorized,
 
+    #[error("item not found")]
+    ItemNotFound,
+
+    #[error("Bad request: {0}")]
+    BadRequest(String),
+
     #[error("database error: {0}")]
     Database(#[from] sea_orm::DbErr),
 
@@ -39,6 +45,8 @@ impl IntoResponse for AppError {
                 (StatusCode::UNAUTHORIZED, self.to_string())
             }
             AppError::UserExists => (StatusCode::CONFLICT, self.to_string()),
+            AppError::ItemNotFound => (StatusCode::NOT_FOUND, self.to_string()),
+            AppError::BadRequest(_) => (StatusCode::BAD_REQUEST, self.to_string()),
             _ => (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "internal server error".to_string(),

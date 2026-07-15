@@ -13,6 +13,7 @@ use crate::types::api::auth::TokenInfo;
 use crate::util::tokensigner::Claims;
 
 mod auth;
+mod item;
 
 async fn heartbeat() -> Json<Heartbeat> {
     Json(Heartbeat::default())
@@ -28,6 +29,7 @@ async fn me(Extension(claims): Extension<Claims>) -> Json<TokenInfo> {
 pub fn get_router(state: Arc<AppState>) -> Router<Arc<AppState>> {
     let protected = Router::new()
         .route("/me", get(me))
+        .nest("/item", item::get_router())
         .layer(from_fn_with_state(state, tokenauth::require_auth));
 
     Router::new()
