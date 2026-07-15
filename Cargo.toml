@@ -13,9 +13,14 @@ clap = { version = "4.6.1", features = ["derive"] }
 serde = { version = "1.0.228", features = ["derive"] }
 toml = "1.1.2"
 sonic-rs = "0.5.8"
-#sea-orm = { version = "2.0.0-rc", features = [ "sqlx-postgres", "runtime-tokio-rustls", "macros" ] }
-sea-orm = { git = "https://github.com/SeaQL/sea-orm.git", rev = "aa3624617991fdb76645fbf0935ab7de491c2ba2", features = [ "sqlx-postgres", "runtime-tokio-rustls", "macros" ] }
+sea-orm = { version = "2.0.0-rc", features = [ "sqlx-postgres", "runtime-tokio-rustls", "macros" ] }
 anyhow = "1.0.103"
 thiserror = "2.0.18"
 tracing = "0.1.44"
 tracing-subscriber = "0.3.23"
+argon2 = { version = "0.5", features = ["password-hash"] }
+jsonwebtoken = "9"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1", features = ["v4", "v7", "serde"] }
+rand = "0.8"
+struct-patch = "0.12.5"

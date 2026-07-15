@@ -18,6 +18,4 @@ features = [
     "runtime-tokio-rustls",  # `ASYNC_RUNTIME` feature
     "sqlx-postgres",         # `DATABASE_DRIVER` feature
 ]
-#version = "2.0.0-rc"
-git = "https://github.com/SeaQL/sea-orm.git"
-rev = "aa3624617991fdb76645fbf0935ab7de491c2ba2"
+version = "2.0.0-rc"

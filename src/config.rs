@@ -1,20 +1,28 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Http {
     pub listen: std::net::IpAddr,
     pub port: u16,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Db {
     pub database_url: String,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct Jwt {
+    pub secret: String,
+    pub ttl: i64,
+    pub issuer: String,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Config {
     pub http: Http,
     pub db: Db,
+    pub jwt: Jwt,
 }
 
 impl Config {

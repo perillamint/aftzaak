@@ -5,11 +5,15 @@ use axum::Router;
 use clap::Parser;
 use sea_orm::Database;
 
+use crate::tokensigner::TokenSigner;
 use config::Config;
 
-mod config;
-mod api;
-mod types;
+pub mod api;
+pub mod config;
+pub mod entity;
+pub mod error;
+mod tokensigner;
+pub mod types;
 
 #[derive(Parser)]
 struct Args {
@@ -17,9 +21,11 @@ struct Args {
     config: String,
 }
 
-struct AppState {
-    #[allow(dead_code)]
-    db: sea_orm::DatabaseConnection,
+#[derive(Clone)]
+pub struct AppState {
+    pub db: sea_orm::DatabaseConnection,
+    pub jwt: Arc<config::Jwt>,
+    pub tokensigner: Arc<TokenSigner>,
 }
 
 #[tokio::main]
@@ -31,7 +37,13 @@ async fn main() -> Result<(), anyhow::Error> {
 
     let db = Database::connect(&cfg.db.database_url).await?;
 
-    let state = Arc::new(AppState { db });
+    let tokensigner = TokenSigner::new(cfg.jwt.clone());
+
+    let state = Arc::new(AppState {
+        db,
+        jwt: Arc::new(cfg.jwt),
+        tokensigner: Arc::new(tokensigner),
+    });
 
     let app = Router::new()
         .nest("/api", api::get_router())
