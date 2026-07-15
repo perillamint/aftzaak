@@ -19,6 +19,7 @@ pub struct RegisterRequest {
 pub struct UserInfo {
     pub id: Uuid,
     pub email: String,
+    #[serde(skip_serializing)]
     pub password: Option<String>,
     pub display_name: Option<String>,
 }

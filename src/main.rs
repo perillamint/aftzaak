@@ -5,15 +5,15 @@ use axum::Router;
 use clap::Parser;
 use sea_orm::Database;
 
-use crate::tokensigner::TokenSigner;
 use config::Config;
+use util::tokensigner::TokenSigner;
 
 pub mod api;
 pub mod config;
 pub mod entity;
 pub mod error;
-mod tokensigner;
 pub mod types;
+pub mod util;
 
 #[derive(Parser)]
 struct Args {
@@ -24,13 +24,14 @@ struct Args {
 #[derive(Clone)]
 pub struct AppState {
     pub db: sea_orm::DatabaseConnection,
-    pub jwt: Arc<config::Jwt>,
     pub tokensigner: Arc<TokenSigner>,
 }
 
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
-    tracing_subscriber::fmt::init();
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .init();
 
     let args = Args::parse();
     let cfg = Config::parse_config_file(&args.config).await?;
@@ -41,7 +42,6 @@ async fn main() -> Result<(), anyhow::Error> {
 
     let state = Arc::new(AppState {
         db,
-        jwt: Arc::new(cfg.jwt),
         tokensigner: Arc::new(tokensigner),
     });
 
@@ -60,6 +60,7 @@ async fn main() -> Result<(), anyhow::Error> {
     Ok(())
 }
 
+// Code stolen from axum example. MIT.
 async fn shutdown_signal() {
     let ctrl_c = async {
         tokio::signal::ctrl_c()
