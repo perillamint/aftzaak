@@ -21,6 +21,7 @@ pub(crate) enum Item {
     Metadata,
     CreatedAt,
     UpdatedAt,
+    DeletedAt,
 }
 
 #[async_trait::async_trait]
@@ -49,6 +50,11 @@ impl MigrationTrait for Migration {
                             .timestamp_with_time_zone()
                             .not_null()
                             .default(Expr::current_timestamp()),
+                    )
+                    .col(
+                        ColumnDef::new(Item::DeletedAt)
+                            .timestamp_with_time_zone()
+                            .null()
                     )
                     .to_owned(),
             )
@@ -83,6 +89,16 @@ impl MigrationTrait for Migration {
                     .table(Item::Table)
                     .col(Item::UpdatedAt)
                     .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_index(
+                Index::create()
+                    .name("idx__item__deleted_at")
+                    .table(Item::Table)
+                    .col(Item::UpdatedAt)
+                    .to_owned()
             )
             .await?;
 
