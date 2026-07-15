@@ -1,5 +1,5 @@
 use super::m20260702_134555_create_facet_table::Facet;
-use super::m20260702_134932_create_item_table::Item;
+use super::m20260702_134432_create_item_table::Item;
 use sea_orm_migration::prelude::*;
 use sea_query::Expr;
 
