@@ -86,7 +86,7 @@ async fn get_one(
         .filter(item::Column::DeletedAt.is_null())
         .one(&state.db)
         .await?
-        .ok_or(AppError::ItemNotFound)?;
+        .ok_or(AppError::NotFound("item".to_string()))?;
     Ok(Json(model.into()))
 }
 
@@ -99,7 +99,7 @@ async fn update(
         .filter(item::Column::DeletedAt.is_null())
         .one(&state.db)
         .await?
-        .ok_or(AppError::ItemNotFound)?;
+        .ok_or(AppError::NotFound("item".to_string()))?;
 
     let mut active: item::ActiveModel = model.into();
     let now = Utc::now().fixed_offset();
@@ -133,7 +133,7 @@ async fn delete(State(state): State<Arc<AppState>>, Path(id): Path<Uuid>) -> App
         .filter(item::Column::DeletedAt.is_null())
         .one(&state.db)
         .await?
-        .ok_or(AppError::ItemNotFound)?;
+        .ok_or(AppError::NotFound("item".to_string()))?;
 
     let mut active: item::ActiveModel = model.into();
     let now = Utc::now().fixed_offset();

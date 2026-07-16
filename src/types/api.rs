@@ -1,4 +1,5 @@
 pub mod auth;
+pub mod facet;
 pub mod item;
 
 use serde::{Deserialize, Serialize};

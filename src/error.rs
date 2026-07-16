@@ -14,8 +14,8 @@ pub enum AppError {
     #[error("unauthorized")]
     Unauthorized,
 
-    #[error("item not found")]
-    ItemNotFound,
+    #[error("Resource not found: {0}")]
+    NotFound(String),
 
     #[error("Bad request: {0}")]
     BadRequest(String),
@@ -45,7 +45,7 @@ impl IntoResponse for AppError {
                 (StatusCode::UNAUTHORIZED, self.to_string())
             }
             AppError::UserExists => (StatusCode::CONFLICT, self.to_string()),
-            AppError::ItemNotFound => (StatusCode::NOT_FOUND, self.to_string()),
+            AppError::NotFound(_) => (StatusCode::NOT_FOUND, self.to_string()),
             AppError::BadRequest(_) => (StatusCode::BAD_REQUEST, self.to_string()),
             _ => (
                 StatusCode::INTERNAL_SERVER_ERROR,
