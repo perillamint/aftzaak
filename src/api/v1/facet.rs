@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
-use axum::routing::{get, post};
+use axum::routing::{delete, get, patch, post};
 use axum::{Json, Router};
 use chrono::Utc;
 use sea_orm::{
@@ -17,11 +17,14 @@ use crate::types::api::facet::{Facet, FacetListQuery, FacetListResponse, FacetPa
 
 pub fn get_router() -> Router<Arc<AppState>> {
     Router::new()
-        .route("/", post(create).get(list))
-        .route("/{id}", get(get_one).patch(update).delete(delete))
+        .route("/", get(list_facet))
+        .route("/", post(create_facet))
+        .route("/{id}", get(get_facet))
+        .route("/{id}", patch(update_facet))
+        .route("/{id}", delete(delete_facet))
 }
 
-async fn create(
+async fn create_facet(
     State(state): State<Arc<AppState>>,
     Json(req): Json<FacetPatch>,
 ) -> AppResult<(StatusCode, Json<Facet>)> {
@@ -49,7 +52,7 @@ async fn create(
     Ok((StatusCode::CREATED, Json(model.into())))
 }
 
-async fn list(
+async fn list_facet(
     State(state): State<Arc<AppState>>,
     Query(q): Query<FacetListQuery>,
 ) -> AppResult<Json<FacetListResponse>> {
@@ -71,7 +74,7 @@ async fn list(
     Ok(Json(FacetListResponse { facets, total }))
 }
 
-async fn get_one(
+async fn get_facet(
     State(state): State<Arc<AppState>>,
     Path(id): Path<Uuid>,
 ) -> AppResult<Json<Facet>> {
@@ -82,7 +85,7 @@ async fn get_one(
     Ok(Json(model.into()))
 }
 
-async fn update(
+async fn update_facet(
     State(state): State<Arc<AppState>>,
     Path(id): Path<Uuid>,
     Json(req): Json<FacetPatch>,
@@ -116,12 +119,10 @@ async fn update(
     Ok(Json(model.into()))
 }
 
-async fn delete(
+async fn delete_facet(
     State(state): State<Arc<AppState>>,
     Path(id): Path<Uuid>,
 ) -> AppResult<StatusCode> {
-    facet::Entity::delete_by_id(id)
-        .exec(&state.db)
-        .await?;
+    facet::Entity::delete_by_id(id).exec(&state.db).await?;
     Ok(StatusCode::NO_CONTENT)
 }

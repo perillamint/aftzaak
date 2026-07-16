@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
-use axum::routing::{get, post};
+use axum::routing::{delete, get, patch, post};
 use axum::{Json, Router};
 use chrono::Utc;
 use sea_orm::{
@@ -18,11 +18,14 @@ use crate::types::api::item::{Item, ItemListQuery, ItemListResponse, ItemPatch};
 
 pub fn get_router() -> Router<Arc<AppState>> {
     Router::new()
-        .route("/", post(create).get(list))
-        .route("/{id}", get(get_one).patch(update).delete(delete))
+        .route("/", get(list_item))
+        .route("/", post(create_item))
+        .route("/{id}", get(get_item))
+        .route("/{id}", patch(update_item))
+        .route("/{id}", delete(delete_item))
 }
 
-async fn create(
+async fn create_item(
     State(state): State<Arc<AppState>>,
     Json(req): Json<ItemPatch>,
 ) -> AppResult<(StatusCode, Json<Item>)> {
@@ -52,7 +55,7 @@ async fn create(
     Ok((StatusCode::CREATED, Json(model.into())))
 }
 
-async fn list(
+async fn list_item(
     State(state): State<Arc<AppState>>,
     Query(q): Query<ItemListQuery>,
 ) -> AppResult<Json<ItemListResponse>> {
@@ -78,7 +81,7 @@ async fn list(
     Ok(Json(ItemListResponse { items, total }))
 }
 
-async fn get_one(
+async fn get_item(
     State(state): State<Arc<AppState>>,
     Path(id): Path<Uuid>,
 ) -> AppResult<Json<Item>> {
@@ -90,7 +93,7 @@ async fn get_one(
     Ok(Json(model.into()))
 }
 
-async fn update(
+async fn update_item(
     State(state): State<Arc<AppState>>,
     Path(id): Path<Uuid>,
     Json(req): Json<ItemPatch>,
@@ -128,7 +131,10 @@ async fn update(
     Ok(Json(model.into()))
 }
 
-async fn delete(State(state): State<Arc<AppState>>, Path(id): Path<Uuid>) -> AppResult<StatusCode> {
+async fn delete_item(
+    State(state): State<Arc<AppState>>,
+    Path(id): Path<Uuid>,
+) -> AppResult<StatusCode> {
     let model = item::Entity::find_by_id(id)
         .filter(item::Column::DeletedAt.is_null())
         .one(&state.db)
