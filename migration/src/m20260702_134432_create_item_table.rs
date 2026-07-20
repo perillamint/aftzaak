@@ -67,7 +67,7 @@ impl MigrationTrait for Migration {
                     .name("idx__item__metadata")
                     .table(Item::Table)
                     .col(Item::Metadata)
-                    .full_text()
+                    .index_type(IndexType::Custom("Gin".into_iden()))
                     .to_owned(),
             )
             .await?;
@@ -97,7 +97,7 @@ impl MigrationTrait for Migration {
                 Index::create()
                     .name("idx__item__deleted_at")
                     .table(Item::Table)
-                    .col(Item::UpdatedAt)
+                    .col(Item::DeletedAt)
                     .to_owned(),
             )
             .await?;

@@ -3,5 +3,7 @@
 pub use super::facet::Entity as Facet;
 pub use super::item::Entity as Item;
 pub use super::item_facet_value::Entity as ItemFacetValue;
+pub use super::role::Entity as Role;
 pub use super::user::Entity as User;
 pub use super::user_oidc_id::Entity as UserOidcId;
+pub use super::user_role::Entity as UserRole;

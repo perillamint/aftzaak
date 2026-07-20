@@ -5,5 +5,7 @@ pub mod prelude;
 pub mod facet;
 pub mod item;
 pub mod item_facet_value;
+pub mod role;
 pub mod user;
 pub mod user_oidc_id;
+pub mod user_role;

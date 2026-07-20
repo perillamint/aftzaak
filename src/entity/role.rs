@@ -4,33 +4,21 @@ use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize, Deserialize)]
-#[sea_orm(table_name = "user")]
+#[sea_orm(table_name = "role")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
     #[sea_orm(column_type = "Text", unique)]
-    pub email: String,
-    #[sea_orm(column_type = "Text", nullable)]
-    pub password: Option<String>,
-    #[sea_orm(column_type = "Text", nullable)]
-    pub display_name: Option<String>,
-    pub state: bool,
+    pub name: String,
+    pub permissions: Vec<String>,
     pub created_at: DateTimeWithTimeZone,
     pub updated_at: DateTimeWithTimeZone,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(has_many = "super::user_oidc_id::Entity")]
-    UserOidcId,
     #[sea_orm(has_many = "super::user_role::Entity")]
     UserRole,
-}
-
-impl Related<super::user_oidc_id::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::UserOidcId.def()
-    }
 }
 
 impl Related<super::user_role::Entity> for Entity {

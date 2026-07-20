@@ -56,17 +56,6 @@ impl MigrationTrait for Migration {
             )
             .await?;
 
-        // Lookup index on email
-        manager
-            .create_index(
-                Index::create()
-                    .name("idx__user__email")
-                    .table(User::Table)
-                    .col(User::Email)
-                    .to_owned(),
-            )
-            .await?;
-
         Ok(())
     }
 

@@ -5,6 +5,8 @@ mod m20260702_134432_create_item_table;
 mod m20260702_134555_create_facet_table;
 mod m20260702_135010_create_item_facet_value_table;
 mod m20260702_234555_create_user_oidc_id_table;
+mod m20260720_144717_create_role_table;
+mod m20260720_144727_create_user_role_table;
 
 pub struct Migrator;
 
@@ -17,6 +19,8 @@ impl MigratorTrait for Migrator {
             Box::new(m20260702_134555_create_facet_table::Migration),
             Box::new(m20260702_135010_create_item_facet_value_table::Migration),
             Box::new(m20260702_234555_create_user_oidc_id_table::Migration),
+            Box::new(m20260720_144717_create_role_table::Migration),
+            Box::new(m20260720_144727_create_user_role_table::Migration),
         ]
     }
 }
