@@ -13,7 +13,8 @@ use uuid::Uuid;
 use crate::AppState;
 use crate::entity::facet;
 use crate::error::{AppError, AppResult};
-use crate::types::api::facet::{Facet, FacetListQuery, FacetListResponse, FacetPatch};
+use crate::types::api::facet::{Facet, FacetPatch};
+use crate::types::api::{ListQuery, ListResponse};
 
 pub fn get_router() -> Router<Arc<AppState>> {
     Router::new()
@@ -54,8 +55,8 @@ async fn create_facet(
 
 async fn list_facet(
     State(state): State<Arc<AppState>>,
-    Query(q): Query<FacetListQuery>,
-) -> AppResult<Json<FacetListResponse>> {
+    Query(q): Query<ListQuery>,
+) -> AppResult<Json<ListResponse<Facet>>> {
     let limit = q.limit.unwrap_or(20).min(100);
     let offset = q.offset.unwrap_or(0);
 
@@ -71,7 +72,7 @@ async fn list_facet(
         .map(Facet::from)
         .collect();
 
-    Ok(Json(FacetListResponse { facets, total }))
+    Ok(Json(ListResponse { data: facets, total }))
 }
 
 async fn get_facet(

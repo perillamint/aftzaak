@@ -14,7 +14,8 @@ use uuid::Uuid;
 use crate::AppState;
 use crate::entity::item;
 use crate::error::{AppError, AppResult};
-use crate::types::api::item::{Item, ItemListQuery, ItemListResponse, ItemPatch};
+use crate::types::api::item::{Item, ItemPatch};
+use crate::types::api::{ListQuery, ListResponse};
 
 pub fn get_router() -> Router<Arc<AppState>> {
     Router::new()
@@ -57,8 +58,8 @@ async fn create_item(
 
 async fn list_item(
     State(state): State<Arc<AppState>>,
-    Query(q): Query<ItemListQuery>,
-) -> AppResult<Json<ItemListResponse>> {
+    Query(q): Query<ListQuery>,
+) -> AppResult<Json<ListResponse<Item>>> {
     let limit = q.limit.unwrap_or(20).min(100);
     let offset = q.offset.unwrap_or(0);
 
@@ -78,7 +79,7 @@ async fn list_item(
         .map(Item::from)
         .collect();
 
-    Ok(Json(ItemListResponse { items, total }))
+    Ok(Json(ListResponse { data: items, total }))
 }
 
 async fn get_item(

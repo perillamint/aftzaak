@@ -35,14 +35,4 @@ impl From<item::Model> for Item {
     }
 }
 
-#[derive(Deserialize)]
-pub struct ItemListQuery {
-    pub limit: Option<u64>,
-    pub offset: Option<u64>,
-}
 
-#[derive(Serialize)]
-pub struct ItemListResponse {
-    pub items: Vec<Item>,
-    pub total: u64,
-}

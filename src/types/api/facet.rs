@@ -33,14 +33,4 @@ impl From<facet::Model> for Facet {
     }
 }
 
-#[derive(Deserialize)]
-pub struct FacetListQuery {
-    pub limit: Option<u64>,
-    pub offset: Option<u64>,
-}
 
-#[derive(Serialize)]
-pub struct FacetListResponse {
-    pub facets: Vec<Facet>,
-    pub total: u64,
-}
