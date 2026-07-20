@@ -72,7 +72,10 @@ async fn list_facet(
         .map(Facet::from)
         .collect();
 
-    Ok(Json(ListResponse { data: facets, total }))
+    Ok(Json(ListResponse {
+        data: facets,
+        total,
+    }))
 }
 
 async fn get_facet(

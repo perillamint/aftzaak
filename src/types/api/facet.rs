@@ -32,5 +32,3 @@ impl From<facet::Model> for Facet {
         }
     }
 }
-
-
