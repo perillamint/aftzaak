@@ -12,6 +12,7 @@ use crate::types::api::Heartbeat;
 use crate::types::api::auth::TokenInfo;
 use crate::util::tokensigner::Claims;
 
+mod admin;
 mod auth;
 mod facet;
 mod item;
@@ -32,6 +33,7 @@ pub fn get_router(state: Arc<AppState>) -> Router<Arc<AppState>> {
         .route("/me", get(me))
         .nest("/item", item::get_router())
         .nest("/facet", facet::get_router())
+        .nest("/admin", admin::get_router())
         .layer(from_fn_with_state(state, tokenauth::require_auth));
 
     Router::new()
