@@ -1,62 +1,24 @@
 use std::collections::HashSet;
 use std::sync::Arc;
 
-use argon2::password_hash::SaltString;
-use argon2::password_hash::rand_core::OsRng;
-use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
+use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use axum::extract::State;
 use axum::routing::post;
 use axum::{Json, Router};
-use chrono::Utc;
-use sea_orm::{ActiveModelTrait, ActiveValue, ColumnTrait, EntityTrait, QueryFilter};
-use uuid::Uuid;
+use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
 
 use crate::AppState;
 use crate::entity::{
-    role::Entity as RoleEntity, user::ActiveModel as UserActiveModel, user::Column as UserColumn,
+    role::Entity as RoleEntity, user::Column as UserColumn,
     user::Entity as UserEntity, user_role::Column as UserRoleColumn,
     user_role::Entity as UserRoleEntity,
 };
 use crate::error::{AppError, AppResult};
 use crate::perms::{Permission, parse_permissions};
-use crate::types::api::auth::{LoginRequest, RegisterRequest, TokenPayload, TokenResponse};
+use crate::types::api::auth::{LoginRequest, TokenPayload, TokenResponse};
 
 pub fn get_router() -> Router<Arc<AppState>> {
-    Router::new()
-        .route("/register", post(register))
-        .route("/login", post(login))
-}
-
-async fn register(
-    State(state): State<Arc<AppState>>,
-    Json(req): Json<RegisterRequest>,
-) -> AppResult<Json<()>> {
-    let existing = UserEntity::find()
-        .filter(UserColumn::Email.eq(&req.email))
-        .one(&state.db)
-        .await?;
-    if existing.is_some() {
-        return Err(AppError::UserExists);
-    }
-
-    let salt = SaltString::generate(&mut OsRng);
-    let hash = Argon2::default()
-        .hash_password(req.password.as_bytes(), &salt)
-        .map_err(|e| AppError::PasswordHash(e.to_string()))?;
-    let hashed = hash.to_string();
-    let now = Utc::now().fixed_offset();
-    let model = UserActiveModel {
-        id: ActiveValue::Set(Uuid::now_v7()),
-        email: ActiveValue::Set(req.email.clone()),
-        password: ActiveValue::Set(Some(hashed)),
-        display_name: ActiveValue::Set(Some(req.display_name.clone())),
-        state: ActiveValue::Set(true),
-        created_at: ActiveValue::Set(now),
-        updated_at: ActiveValue::Set(now),
-    };
-    let _user = model.insert(&state.db).await?;
-
-    Ok(Json(()))
+    Router::new().route("/login", post(login))
 }
 
 async fn login(
