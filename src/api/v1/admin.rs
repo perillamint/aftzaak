@@ -1,3 +1,6 @@
+mod role;
+mod user;
+
 use std::sync::Arc;
 
 use axum::extract::{Path, State};
@@ -14,7 +17,14 @@ use uuid::Uuid;
 
 use crate::AppState;
 use crate::api::middleware::permission_filter::check_perm;
-use crate::entity::{role, user, user_role};
+use crate::entity::{
+    role::Entity as RoleEntity,
+    role::ActiveModel as RoleActiveModel,
+    user::Entity as UserEntity,
+    user_role::Entity as UserRoleEntity,
+    user_role::Column as UserRoleColumn,
+    user_role::ActiveModel as UserRoleActiveModel,
+};
 use crate::error::{AppError, AppResult};
 use crate::perms::{Permission, permissions_to_strings};
 use crate::types::api::admin::{AssignRoleRequest, RoleInfo, RoleInfoPatch};
@@ -46,9 +56,9 @@ async fn list_roles(
     let limit = q.limit.unwrap_or(20).min(100);
     let offset = q.offset.unwrap_or(0);
 
-    let total = role::Entity::find().count(&state.db).await?;
+    let total = RoleEntity::find().count(&state.db).await?;
 
-    let roles = role::Entity::find()
+    let roles = RoleEntity::find()
         .offset(offset)
         .limit(limit)
         .all(&state.db)
@@ -65,7 +75,7 @@ async fn create_role(
     Json(req): Json<RoleInfoPatch>,
 ) -> AppResult<(StatusCode, Json<RoleInfo>)> {
     let now = Utc::now().fixed_offset();
-    let model = role::ActiveModel {
+    let model = RoleActiveModel {
         id: ActiveValue::Set(Uuid::now_v7()),
         name: ActiveValue::Set(
             req.name
@@ -83,7 +93,7 @@ async fn get_role(
     State(state): State<Arc<AppState>>,
     Path(id): Path<Uuid>,
 ) -> AppResult<Json<RoleInfo>> {
-    let model = role::Entity::find_by_id(id)
+    let model = RoleEntity::find_by_id(id)
         .one(&state.db)
         .await?
         .ok_or(AppError::NotFound("role".to_string()))?;
@@ -95,12 +105,12 @@ async fn update_role(
     Path(id): Path<Uuid>,
     Json(req): Json<RoleInfoPatch>,
 ) -> AppResult<Json<RoleInfo>> {
-    let model = role::Entity::find_by_id(id)
+    let model = RoleEntity::find_by_id(id)
         .one(&state.db)
         .await?
         .ok_or(AppError::NotFound("role".to_string()))?;
 
-    let mut active: role::ActiveModel = model.into();
+    let mut active: RoleActiveModel = model.into();
     let now = Utc::now().fixed_offset();
 
     if let Some(v) = req.name {
@@ -119,7 +129,7 @@ async fn delete_role(
     State(state): State<Arc<AppState>>,
     Path(id): Path<Uuid>,
 ) -> AppResult<StatusCode> {
-    role::Entity::delete_by_id(id).exec(&state.db).await?;
+    RoleEntity::delete_by_id(id).exec(&state.db).await?;
     Ok(StatusCode::NO_CONTENT)
 }
 
@@ -130,14 +140,14 @@ async fn list_user_roles(
     Path(user_id): Path<Uuid>,
 ) -> AppResult<Json<Vec<RoleInfo>>> {
     // Verify user exists
-    let _user = user::Entity::find_by_id(user_id)
+    let _user = UserEntity::find_by_id(user_id)
         .one(&state.db)
         .await?
         .ok_or(AppError::NotFound("user".to_string()))?;
 
-    let user_roles = user_role::Entity::find()
-        .filter(user_role::Column::UserId.eq(user_id))
-        .find_also_related(role::Entity)
+    let user_roles = UserRoleEntity::find()
+        .filter(UserRoleColumn::UserId.eq(user_id))
+        .find_also_related(RoleEntity)
         .all(&state.db)
         .await?;
 
@@ -156,21 +166,21 @@ async fn assign_role(
     Json(req): Json<AssignRoleRequest>,
 ) -> AppResult<StatusCode> {
     // Verify user exists
-    let _user = user::Entity::find_by_id(user_id)
+    let _user = UserEntity::find_by_id(user_id)
         .one(&state.db)
         .await?
         .ok_or(AppError::NotFound("user".to_string()))?;
 
     // Verify role exists
-    let _role = role::Entity::find_by_id(req.role_id)
+    let _role = RoleEntity::find_by_id(req.role_id)
         .one(&state.db)
         .await?
         .ok_or(AppError::NotFound("role".to_string()))?;
 
     // Check if already assigned
-    let existing = user_role::Entity::find()
-        .filter(user_role::Column::UserId.eq(user_id))
-        .filter(user_role::Column::RoleId.eq(req.role_id))
+    let existing = UserRoleEntity::find()
+        .filter(UserRoleColumn::UserId.eq(user_id))
+        .filter(UserRoleColumn::RoleId.eq(req.role_id))
         .one(&state.db)
         .await?;
 
@@ -179,7 +189,7 @@ async fn assign_role(
     }
 
     let now = Utc::now().fixed_offset();
-    let model = user_role::ActiveModel {
+    let model = UserRoleActiveModel {
         id: ActiveValue::Set(Uuid::now_v7()),
         user_id: ActiveValue::Set(user_id),
         role_id: ActiveValue::Set(req.role_id),
@@ -194,14 +204,14 @@ async fn revoke_role(
     State(state): State<Arc<AppState>>,
     Path((user_id, role_id)): Path<(Uuid, Uuid)>,
 ) -> AppResult<StatusCode> {
-    let model = user_role::Entity::find()
-        .filter(user_role::Column::UserId.eq(user_id))
-        .filter(user_role::Column::RoleId.eq(role_id))
+    let model = UserRoleEntity::find()
+        .filter(UserRoleColumn::UserId.eq(user_id))
+        .filter(UserRoleColumn::RoleId.eq(role_id))
         .one(&state.db)
         .await?
         .ok_or(AppError::NotFound("user_role".to_string()))?;
 
-    user_role::Entity::delete_by_id(model.id)
+    UserRoleEntity::delete_by_id(model.id)
         .exec(&state.db)
         .await?;
 

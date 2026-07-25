@@ -12,7 +12,14 @@ use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter};
 use uuid::Uuid;
 
 use crate::AppState;
-use crate::entity::{role, user, user_role};
+use crate::entity::{
+    role::Entity as RoleEntity,
+    user::ActiveModel as UserActiveModel,
+    user::Column as UserColumn,
+    user::Entity as UserEntity,
+    user_role::Column as UserRoleColumn,
+    user_role::Entity as UserRoleEntity,
+};
 use crate::error::{AppError, AppResult};
 use crate::perms::{Permission, parse_permissions};
 use crate::types::api::auth::{LoginRequest, RegisterRequest, TokenPayload, TokenResponse};
@@ -27,8 +34,8 @@ async fn register(
     State(state): State<Arc<AppState>>,
     Json(req): Json<RegisterRequest>,
 ) -> AppResult<Json<()>> {
-    let existing = user::Entity::find()
-        .filter(user::Column::Email.eq(&req.email))
+    let existing = UserEntity::find()
+        .filter(UserColumn::Email.eq(&req.email))
         .one(&state.db)
         .await?;
     if existing.is_some() {
@@ -41,7 +48,7 @@ async fn register(
         .map_err(|e| AppError::PasswordHash(e.to_string()))?;
     let hashed = hash.to_string();
     let now = Utc::now().fixed_offset();
-    let model = user::ActiveModel {
+    let model = UserActiveModel {
         id: sea_orm::ActiveValue::Set(Uuid::now_v7()),
         email: sea_orm::ActiveValue::Set(req.email.clone()),
         password: sea_orm::ActiveValue::Set(Some(hashed)),
@@ -59,9 +66,9 @@ async fn login(
     State(state): State<Arc<AppState>>,
     Json(req): Json<LoginRequest>,
 ) -> AppResult<Json<TokenResponse>> {
-    let user = user::Entity::find()
-        .filter(user::Column::Email.eq(&req.email))
-        .filter(user::Column::State.eq(true))
+    let user = UserEntity::find()
+        .filter(UserColumn::Email.eq(&req.email))
+        .filter(UserColumn::State.eq(true))
         .one(&state.db)
         .await?
         .ok_or(AppError::InvalidCredentials)?;
@@ -80,9 +87,9 @@ async fn login(
 
     let (token, exp) = {
         // Gather permissions from all roles assigned to this user
-        let user_roles = user_role::Entity::find()
-            .filter(user_role::Column::UserId.eq(user.id))
-            .find_also_related(role::Entity)
+        let user_roles = UserRoleEntity::find()
+            .filter(UserRoleColumn::UserId.eq(user.id))
+            .find_also_related(RoleEntity)
             .all(&state.db)
             .await?;
 

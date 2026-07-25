@@ -13,7 +13,11 @@ use uuid::Uuid;
 
 use crate::AppState;
 use crate::api::middleware::permission_filter::check_perm;
-use crate::entity::facet;
+use crate::entity::{
+    facet::ActiveModel as FacetActiveModel,
+    facet::Column as FacetColumn,
+    facet::Entity as FacetEntity,
+};
 use crate::error::{AppError, AppResult};
 use crate::perms::Permission;
 use crate::types::api::facet::{Facet, FacetPatch};
@@ -49,7 +53,7 @@ async fn create_facet(
     Json(req): Json<FacetPatch>,
 ) -> AppResult<(StatusCode, Json<Facet>)> {
     let now = Utc::now().fixed_offset();
-    let model = facet::ActiveModel {
+    let model = FacetActiveModel {
         id: ActiveValue::Set(Uuid::now_v7()),
         key: ActiveValue::Set(
             req.key
@@ -79,10 +83,10 @@ async fn list_facet(
     let limit = q.limit.unwrap_or(20).min(100);
     let offset = q.offset.unwrap_or(0);
 
-    let total = facet::Entity::find().count(&state.db).await?;
+    let total = FacetEntity::find().count(&state.db).await?;
 
-    let facets = facet::Entity::find()
-        .order_by_asc(facet::Column::SortOrder)
+    let facets = FacetEntity::find()
+        .order_by_asc(FacetColumn::SortOrder)
         .offset(offset)
         .limit(limit)
         .all(&state.db)
@@ -101,7 +105,7 @@ async fn get_facet(
     State(state): State<Arc<AppState>>,
     Path(id): Path<Uuid>,
 ) -> AppResult<Json<Facet>> {
-    let model = facet::Entity::find_by_id(id)
+    let model = FacetEntity::find_by_id(id)
         .one(&state.db)
         .await?
         .ok_or(AppError::NotFound("facet".to_string()))?;
@@ -113,12 +117,12 @@ async fn update_facet(
     Path(id): Path<Uuid>,
     Json(req): Json<FacetPatch>,
 ) -> AppResult<Json<Facet>> {
-    let model = facet::Entity::find_by_id(id)
+    let model = FacetEntity::find_by_id(id)
         .one(&state.db)
         .await?
         .ok_or(AppError::NotFound("facet".to_string()))?;
 
-    let mut active: facet::ActiveModel = model.into();
+    let mut active: FacetActiveModel = model.into();
     let now = Utc::now().fixed_offset();
 
     update_am!(
@@ -140,6 +144,6 @@ async fn delete_facet(
     State(state): State<Arc<AppState>>,
     Path(id): Path<Uuid>,
 ) -> AppResult<StatusCode> {
-    facet::Entity::delete_by_id(id).exec(&state.db).await?;
+    FacetEntity::delete_by_id(id).exec(&state.db).await?;
     Ok(StatusCode::NO_CONTENT)
 }

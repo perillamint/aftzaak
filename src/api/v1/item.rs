@@ -14,7 +14,11 @@ use uuid::Uuid;
 
 use crate::AppState;
 use crate::api::middleware::permission_filter::check_perm;
-use crate::entity::item;
+use crate::entity::{
+    item::ActiveModel as ItemActiveModel,
+    item::Column as ItemColumn,
+    item::Entity as ItemEntity,
+};
 use crate::error::{AppError, AppResult};
 use crate::perms::Permission;
 use crate::types::api::item::{Item, ItemPatch};
@@ -50,7 +54,7 @@ async fn create_item(
     Json(req): Json<ItemPatch>,
 ) -> AppResult<(StatusCode, Json<Item>)> {
     let now = Utc::now().fixed_offset();
-    let model = item::ActiveModel {
+    let model = ItemActiveModel {
         id: ActiveValue::Set(Uuid::now_v7()),
         title: ActiveValue::Set(
             req.title
@@ -82,14 +86,14 @@ async fn list_item(
     let limit = q.limit.unwrap_or(20).min(100);
     let offset = q.offset.unwrap_or(0);
 
-    let total = item::Entity::find()
-        .filter(item::Column::DeletedAt.is_null())
+    let total = ItemEntity::find()
+        .filter(ItemColumn::DeletedAt.is_null())
         .count(&state.db)
         .await?;
 
-    let items = item::Entity::find()
-        .filter(item::Column::DeletedAt.is_null())
-        .order_by_desc(item::Column::CreatedAt)
+    let items = ItemEntity::find()
+        .filter(ItemColumn::DeletedAt.is_null())
+        .order_by_desc(ItemColumn::CreatedAt)
         .offset(offset)
         .limit(limit)
         .all(&state.db)
@@ -105,8 +109,8 @@ async fn get_item(
     State(state): State<Arc<AppState>>,
     Path(id): Path<Uuid>,
 ) -> AppResult<Json<Item>> {
-    let model = item::Entity::find_by_id(id)
-        .filter(item::Column::DeletedAt.is_null())
+    let model = ItemEntity::find_by_id(id)
+        .filter(ItemColumn::DeletedAt.is_null())
         .one(&state.db)
         .await?
         .ok_or(AppError::NotFound("item".to_string()))?;
@@ -118,13 +122,13 @@ async fn update_item(
     Path(id): Path<Uuid>,
     Json(req): Json<ItemPatch>,
 ) -> AppResult<Json<Item>> {
-    let model = item::Entity::find_by_id(id)
-        .filter(item::Column::DeletedAt.is_null())
+    let model = ItemEntity::find_by_id(id)
+        .filter(ItemColumn::DeletedAt.is_null())
         .one(&state.db)
         .await?
         .ok_or(AppError::NotFound("item".to_string()))?;
 
-    let mut active: item::ActiveModel = model.into();
+    let mut active: ItemActiveModel = model.into();
     let now = Utc::now().fixed_offset();
 
     update_am!(
@@ -147,13 +151,13 @@ async fn delete_item(
     State(state): State<Arc<AppState>>,
     Path(id): Path<Uuid>,
 ) -> AppResult<StatusCode> {
-    let model = item::Entity::find_by_id(id)
-        .filter(item::Column::DeletedAt.is_null())
+    let model = ItemEntity::find_by_id(id)
+        .filter(ItemColumn::DeletedAt.is_null())
         .one(&state.db)
         .await?
         .ok_or(AppError::NotFound("item".to_string()))?;
 
-    let mut active: item::ActiveModel = model.into();
+    let mut active: ItemActiveModel = model.into();
     let now = Utc::now().fixed_offset();
     active.deleted_at = ActiveValue::Set(Some(now));
     active.updated_at = ActiveValue::Set(now);
