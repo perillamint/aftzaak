@@ -8,12 +8,12 @@ use chrono::Utc;
 use sea_orm::{ActiveModelTrait, ActiveValue, EntityTrait, PaginatorTrait, QuerySelect};
 use uuid::Uuid;
 
-use crate::AppState;
 use crate::entity::{role::ActiveModel as RoleActiveModel, role::Entity as RoleEntity};
 use crate::error::{AppError, AppResult};
 use crate::perms::permissions_to_strings;
 use crate::types::api::admin::{RoleInfo, RoleInfoPatch};
 use crate::types::api::{ListQuery, ListResponse};
+use crate::{AppState, update_am};
 
 pub fn get_router() -> Router<Arc<AppState>> {
     Router::new()
@@ -88,9 +88,7 @@ async fn update_role(
     let mut active: RoleActiveModel = model.into();
     let now = Utc::now().fixed_offset();
 
-    if let Some(v) = req.name {
-        active.name = ActiveValue::Set(v);
-    }
+    update_am!(active, req, name);
     if let Some(v) = req.permissions {
         active.permissions = ActiveValue::Set(permissions_to_strings(&v));
     }

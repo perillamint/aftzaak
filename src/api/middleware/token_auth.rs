@@ -20,7 +20,7 @@ pub async fn require_auth(
         .and_then(|s| s.strip_prefix("Bearer "))
         .ok_or(AppError::Unauthorized)?;
 
-    let claims = state.tokensigner.verify(token)?;
+    let claims = state.token_signer.verify(token)?;
 
     req.extensions_mut().insert(claims);
 

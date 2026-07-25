@@ -5,8 +5,8 @@ use axum::Router;
 use clap::Parser;
 use sea_orm::Database;
 
-use config::Config;
-use util::token_signer::TokenSigner;
+use crate::config::Config;
+use crate::util::token_signer::TokenSigner;
 
 pub mod api;
 pub mod config;
@@ -25,7 +25,7 @@ struct Args {
 #[derive(Clone)]
 pub struct AppState {
     pub db: sea_orm::DatabaseConnection,
-    pub tokensigner: Arc<TokenSigner>,
+    pub token_signer: Arc<TokenSigner>,
 }
 
 #[tokio::main]
@@ -43,7 +43,7 @@ async fn main() -> Result<(), anyhow::Error> {
 
     let state = Arc::new(AppState {
         db,
-        tokensigner: Arc::new(tokensigner),
+        token_signer: Arc::new(tokensigner),
     });
 
     let app = Router::new()
