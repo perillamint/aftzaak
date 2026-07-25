@@ -6,13 +6,12 @@ use clap::Parser;
 use sea_orm::Database;
 
 use config::Config;
-use util::tokensigner::TokenSigner;
+use util::token_signer::TokenSigner;
 
 pub mod api;
 pub mod config;
 pub mod entity;
 pub mod error;
-pub mod middleware;
 pub mod perms;
 pub mod types;
 pub mod util;

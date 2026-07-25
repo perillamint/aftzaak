@@ -4,6 +4,7 @@ use axum::Router;
 
 use crate::AppState;
 
+pub mod middleware;
 mod v1;
 
 pub fn get_router(state: Arc<AppState>) -> axum::Router<Arc<AppState>> {

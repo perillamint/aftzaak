@@ -13,9 +13,9 @@ use sea_orm::{
 use uuid::Uuid;
 
 use crate::AppState;
+use crate::api::middleware::permission_filter::check_perm;
 use crate::entity::{role, user, user_role};
 use crate::error::{AppError, AppResult};
-use crate::middleware::permguard::check_perm;
 use crate::perms::{Permission, permissions_to_strings};
 use crate::types::api::admin::{AssignRoleRequest, RoleInfo, RoleInfoPatch};
 use crate::types::api::{ListQuery, ListResponse};

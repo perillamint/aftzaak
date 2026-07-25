@@ -4,7 +4,7 @@ use axum::response::{IntoResponse, Response};
 
 use crate::error::AppError;
 use crate::perms::Permission;
-use crate::util::tokensigner::Claims;
+use crate::util::token_signer::Claims;
 
 /// Permission check middleware.
 ///

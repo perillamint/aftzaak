@@ -12,9 +12,9 @@ use sea_orm::{
 use uuid::Uuid;
 
 use crate::AppState;
+use crate::api::middleware::permission_filter::check_perm;
 use crate::entity::facet;
 use crate::error::{AppError, AppResult};
-use crate::middleware::permguard::check_perm;
 use crate::perms::Permission;
 use crate::types::api::facet::{Facet, FacetPatch};
 use crate::types::api::{ListQuery, ListResponse};
