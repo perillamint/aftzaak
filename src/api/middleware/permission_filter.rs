@@ -16,7 +16,7 @@ pub async fn check_perm(State(perm): State<Permission>, req: Request, next: Next
         .get::<Claims>()
         .ok_or(AppError::Unauthorized)
         .and_then(|c| {
-            if c.custom_claim.perm.iter().any(|p| *p == perm) {
+            if c.custom_claim.perm.contains(&perm) {
                 Ok(())
             } else {
                 Err(AppError::Forbidden)
