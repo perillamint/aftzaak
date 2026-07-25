@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use struct_patch::Patch;
 use uuid::Uuid;
 
-use crate::entity::facet;
+use crate::entity::facet::Model as FacetModel;
 
 #[derive(Serialize, Deserialize, Patch)]
 #[patch(attribute(derive(Deserialize)))]
@@ -18,8 +18,8 @@ pub struct Facet {
     pub updated_at: DateTimeWithTimeZone,
 }
 
-impl From<facet::Model> for Facet {
-    fn from(m: facet::Model) -> Self {
+impl From<FacetModel> for Facet {
+    fn from(m: FacetModel) -> Self {
         Self {
             id: m.id,
             key: m.key,

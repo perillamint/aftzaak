@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use struct_patch::Patch;
 use uuid::Uuid;
 
-use crate::entity::item;
+use crate::entity::item::Model as ItemModel;
 
 #[derive(Serialize, Deserialize, Patch)]
 #[patch(attribute(derive(Deserialize)))]
@@ -19,8 +19,8 @@ pub struct Item {
     pub updated_at: DateTimeWithTimeZone,
 }
 
-impl From<item::Model> for Item {
-    fn from(m: item::Model) -> Self {
+impl From<ItemModel> for Item {
+    fn from(m: ItemModel) -> Self {
         Self {
             id: m.id,
             title: m.title,

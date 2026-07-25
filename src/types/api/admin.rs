@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use struct_patch::Patch;
 use uuid::Uuid;
 
-use crate::entity::role;
+use crate::entity::role::Model as RoleModel;
 use crate::perms::{Permission, parse_permissions};
 
 #[derive(Serialize, Deserialize, Patch)]
@@ -16,10 +16,10 @@ pub struct RoleInfo {
     pub updated_at: DateTimeWithTimeZone,
 }
 
-impl TryFrom<role::Model> for RoleInfo {
+impl TryFrom<RoleModel> for RoleInfo {
     type Error = strum::ParseError;
 
-    fn try_from(m: role::Model) -> Result<Self, Self::Error> {
+    fn try_from(m: RoleModel) -> Result<Self, Self::Error> {
         Ok(Self {
             id: m.id,
             name: m.name,
