@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::sync::Arc;
 
 use argon2::password_hash::SaltString;
@@ -11,8 +12,9 @@ use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter};
 use uuid::Uuid;
 
 use crate::AppState;
-use crate::entity::user;
+use crate::entity::{role, user, user_role};
 use crate::error::{AppError, AppResult};
+use crate::perms::{Permission, parse_permissions};
 use crate::types::api::auth::{LoginRequest, RegisterRequest, TokenPayload, TokenResponse};
 
 pub fn get_router() -> Router<Arc<AppState>> {
@@ -76,12 +78,29 @@ async fn login(
         return Err(AppError::InvalidCredentials);
     }
 
-    let (token, exp) = state.tokensigner.sign(
-        user.id.to_string(),
-        TokenPayload {
-            perm: "".to_string(),
-        },
-    )?;
+    let (token, exp) = {
+        // Gather permissions from all roles assigned to this user
+        let user_roles = user_role::Entity::find()
+            .filter(user_role::Column::UserId.eq(user.id))
+            .find_also_related(role::Entity)
+            .all(&state.db)
+            .await?;
+
+        let perm: Vec<Permission> = {
+            let raw: Vec<String> = user_roles
+                .into_iter()
+                .filter_map(|(_, r)| r)
+                .flat_map(|r| r.permissions)
+                .collect::<HashSet<_>>()
+                .into_iter()
+                .collect();
+            parse_permissions(raw)?
+        };
+
+        state
+            .tokensigner
+            .sign(user.id.to_string(), TokenPayload { perm })?
+    };
 
     Ok(Json(TokenResponse {
         token,

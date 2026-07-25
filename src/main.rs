@@ -13,6 +13,7 @@ pub mod config;
 pub mod entity;
 pub mod error;
 pub mod middleware;
+pub mod perms;
 pub mod types;
 pub mod util;
 

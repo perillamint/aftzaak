@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
+use axum::middleware::from_fn_with_state;
 use axum::routing::{delete, get, patch, post};
 use axum::{Json, Router};
 use chrono::Utc;
@@ -13,16 +14,33 @@ use uuid::Uuid;
 use crate::AppState;
 use crate::entity::facet;
 use crate::error::{AppError, AppResult};
+use crate::middleware::permguard::check_perm;
+use crate::perms::Permission;
 use crate::types::api::facet::{Facet, FacetPatch};
 use crate::types::api::{ListQuery, ListResponse};
 
 pub fn get_router() -> Router<Arc<AppState>> {
     Router::new()
-        .route("/", get(list_facet))
-        .route("/", post(create_facet))
-        .route("/{id}", get(get_facet))
-        .route("/{id}", patch(update_facet))
-        .route("/{id}", delete(delete_facet))
+        .route(
+            "/",
+            get(list_facet).layer(from_fn_with_state(Permission::FacetRead, check_perm)),
+        )
+        .route(
+            "/",
+            post(create_facet).layer(from_fn_with_state(Permission::FacetWrite, check_perm)),
+        )
+        .route(
+            "/{id}",
+            get(get_facet).layer(from_fn_with_state(Permission::FacetRead, check_perm)),
+        )
+        .route(
+            "/{id}",
+            patch(update_facet).layer(from_fn_with_state(Permission::FacetWrite, check_perm)),
+        )
+        .route(
+            "/{id}",
+            delete(delete_facet).layer(from_fn_with_state(Permission::FacetDelete, check_perm)),
+        )
 }
 
 async fn create_facet(

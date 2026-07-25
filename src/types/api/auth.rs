@@ -2,6 +2,8 @@ use serde::{Deserialize, Serialize};
 use struct_patch::Patch;
 use uuid::Uuid;
 
+use crate::perms::Permission;
+
 #[derive(Deserialize)]
 pub struct LoginRequest {
     pub email: String,
@@ -26,7 +28,7 @@ pub struct UserInfo {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TokenPayload {
-    pub perm: String,
+    pub perm: Vec<Permission>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -39,5 +41,5 @@ pub struct TokenResponse {
 #[derive(Serialize)]
 pub struct TokenInfo {
     pub user_id: String,
-    pub perm: String,
+    pub perm: Vec<Permission>,
 }

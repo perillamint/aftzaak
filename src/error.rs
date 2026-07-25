@@ -3,6 +3,7 @@ use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use serde::Serialize;
 
+/// Application Error
 #[derive(Debug, thiserror::Error)]
 pub enum AppError {
     #[error("invalid credentials")]
@@ -13,6 +14,9 @@ pub enum AppError {
 
     #[error("unauthorized")]
     Unauthorized,
+
+    #[error("forbidden")]
+    Forbidden,
 
     #[error("Resource not found: {0}")]
     NotFound(String),
@@ -31,6 +35,9 @@ pub enum AppError {
 
     #[error("internal error: {0}")]
     Internal(#[from] anyhow::Error),
+
+    #[error("invalid permission: {0}")]
+    InvalidPermission(#[from] strum::ParseError),
 }
 
 #[derive(Serialize)]
@@ -44,6 +51,7 @@ impl IntoResponse for AppError {
             AppError::InvalidCredentials | AppError::Unauthorized => {
                 (StatusCode::UNAUTHORIZED, self.to_string())
             }
+            AppError::Forbidden => (StatusCode::FORBIDDEN, self.to_string()),
             AppError::UserExists => (StatusCode::CONFLICT, self.to_string()),
             AppError::NotFound(_) => (StatusCode::NOT_FOUND, self.to_string()),
             AppError::BadRequest(_) => (StatusCode::BAD_REQUEST, self.to_string()),

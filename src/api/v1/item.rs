@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
+use axum::middleware::from_fn_with_state;
 use axum::routing::{delete, get, patch, post};
 use axum::{Json, Router};
 use chrono::Utc;
@@ -14,16 +15,33 @@ use uuid::Uuid;
 use crate::AppState;
 use crate::entity::item;
 use crate::error::{AppError, AppResult};
+use crate::middleware::permguard::check_perm;
+use crate::perms::Permission;
 use crate::types::api::item::{Item, ItemPatch};
 use crate::types::api::{ListQuery, ListResponse};
 
 pub fn get_router() -> Router<Arc<AppState>> {
     Router::new()
-        .route("/", get(list_item))
-        .route("/", post(create_item))
-        .route("/{id}", get(get_item))
-        .route("/{id}", patch(update_item))
-        .route("/{id}", delete(delete_item))
+        .route(
+            "/",
+            get(list_item).layer(from_fn_with_state(Permission::ItemRead, check_perm)),
+        )
+        .route(
+            "/",
+            post(create_item).layer(from_fn_with_state(Permission::ItemWrite, check_perm)),
+        )
+        .route(
+            "/{id}",
+            get(get_item).layer(from_fn_with_state(Permission::ItemRead, check_perm)),
+        )
+        .route(
+            "/{id}",
+            patch(update_item).layer(from_fn_with_state(Permission::ItemWrite, check_perm)),
+        )
+        .route(
+            "/{id}",
+            delete(delete_item).layer(from_fn_with_state(Permission::ItemDelete, check_perm)),
+        )
 }
 
 async fn create_item(
