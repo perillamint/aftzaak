@@ -8,7 +8,7 @@ use axum::extract::State;
 use axum::routing::post;
 use axum::{Json, Router};
 use chrono::Utc;
-use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter};
+use sea_orm::{ActiveModelTrait, ActiveValue, ColumnTrait, EntityTrait, QueryFilter};
 use uuid::Uuid;
 
 use crate::AppState;
@@ -46,13 +46,13 @@ async fn register(
     let hashed = hash.to_string();
     let now = Utc::now().fixed_offset();
     let model = UserActiveModel {
-        id: sea_orm::ActiveValue::Set(Uuid::now_v7()),
-        email: sea_orm::ActiveValue::Set(req.email.clone()),
-        password: sea_orm::ActiveValue::Set(Some(hashed)),
-        display_name: sea_orm::ActiveValue::Set(Some(req.display_name.clone())),
-        state: sea_orm::ActiveValue::Set(true),
-        created_at: sea_orm::ActiveValue::Set(now),
-        updated_at: sea_orm::ActiveValue::Set(now),
+        id: ActiveValue::Set(Uuid::now_v7()),
+        email: ActiveValue::Set(req.email.clone()),
+        password: ActiveValue::Set(Some(hashed)),
+        display_name: ActiveValue::Set(Some(req.display_name.clone())),
+        state: ActiveValue::Set(true),
+        created_at: ActiveValue::Set(now),
+        updated_at: ActiveValue::Set(now),
     };
     let _user = model.insert(&state.db).await?;
 
