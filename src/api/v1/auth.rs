@@ -13,11 +13,8 @@ use uuid::Uuid;
 
 use crate::AppState;
 use crate::entity::{
-    role::Entity as RoleEntity,
-    user::ActiveModel as UserActiveModel,
-    user::Column as UserColumn,
-    user::Entity as UserEntity,
-    user_role::Column as UserRoleColumn,
+    role::Entity as RoleEntity, user::ActiveModel as UserActiveModel, user::Column as UserColumn,
+    user::Entity as UserEntity, user_role::Column as UserRoleColumn,
     user_role::Entity as UserRoleEntity,
 };
 use crate::error::{AppError, AppResult};

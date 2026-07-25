@@ -14,8 +14,7 @@ use uuid::Uuid;
 use crate::AppState;
 use crate::api::middleware::permission_filter::check_perm;
 use crate::entity::{
-    facet::ActiveModel as FacetActiveModel,
-    facet::Column as FacetColumn,
+    facet::ActiveModel as FacetActiveModel, facet::Column as FacetColumn,
     facet::Entity as FacetEntity,
 };
 use crate::error::{AppError, AppResult};
