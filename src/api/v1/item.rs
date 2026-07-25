@@ -19,6 +19,7 @@ use crate::error::{AppError, AppResult};
 use crate::perms::Permission;
 use crate::types::api::item::{Item, ItemPatch};
 use crate::types::api::{ListQuery, ListResponse};
+use crate::update_am;
 
 pub fn get_router() -> Router<Arc<AppState>> {
     Router::new()
@@ -126,24 +127,16 @@ async fn update_item(
     let mut active: item::ActiveModel = model.into();
     let now = Utc::now().fixed_offset();
 
-    if let Some(v) = req.title {
-        active.title = ActiveValue::Set(v);
-    }
-    if let Some(v) = req.mime_type {
-        active.mime_type = ActiveValue::Set(v);
-    }
-    if let Some(v) = req.size_bytes {
-        active.size_bytes = ActiveValue::Set(v);
-    }
-    if let Some(v) = req.checksum {
-        active.checksum = ActiveValue::Set(v);
-    }
-    if let Some(v) = req.storage_uri {
-        active.storage_uri = ActiveValue::Set(v);
-    }
-    if let Some(v) = req.metadata {
-        active.metadata = ActiveValue::Set(v);
-    }
+    update_am!(
+        active,
+        req,
+        title,
+        mime_type,
+        size_bytes,
+        checksum,
+        storage_uri,
+        metadata,
+    );
     active.updated_at = ActiveValue::Set(now);
 
     let model = active.update(&state.db).await?;

@@ -18,6 +18,7 @@ use crate::error::{AppError, AppResult};
 use crate::perms::Permission;
 use crate::types::api::facet::{Facet, FacetPatch};
 use crate::types::api::{ListQuery, ListResponse};
+use crate::update_am;
 
 pub fn get_router() -> Router<Arc<AppState>> {
     Router::new()
@@ -120,21 +121,15 @@ async fn update_facet(
     let mut active: facet::ActiveModel = model.into();
     let now = Utc::now().fixed_offset();
 
-    if let Some(v) = req.key {
-        active.key = ActiveValue::Set(v);
-    }
-    if let Some(v) = req.display_name {
-        active.display_name = ActiveValue::Set(v);
-    }
-    if let Some(v) = req.value_type {
-        active.value_type = ActiveValue::Set(v);
-    }
-    if let Some(v) = req.is_multi_value {
-        active.is_multi_value = ActiveValue::Set(v);
-    }
-    if let Some(v) = req.sort_order {
-        active.sort_order = ActiveValue::Set(v);
-    }
+    update_am!(
+        active,
+        req,
+        key,
+        display_name,
+        value_type,
+        is_multi_value,
+        sort_order,
+    );
     active.updated_at = ActiveValue::Set(now);
 
     let model = active.update(&state.db).await?;
